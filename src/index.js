@@ -8,7 +8,6 @@ const createApp = ({ logger, container, config }) => {
   const app = express();
 
   // Configure app (eg: security level, cors, logging req & parsing data)
-  app.get('/status', (req, res) => res.status(200).end());
   app.enable('trust proxy');
   app.use(cors());
   app.use(morgan('dev'));
@@ -16,6 +15,8 @@ const createApp = ({ logger, container, config }) => {
   app.use(bodyParser.urlencoded({ extended: false }));
 
   // Register routes
+  app.get(`/${config.api.prefix}/status`, (req, res) => res.status(200).json({ status: 'OK' }));
+
   const routes = listModules('routes/*js', { cwd: __dirname });
   routes.forEach((route) => {
     const { name } = route;
@@ -25,7 +26,7 @@ const createApp = ({ logger, container, config }) => {
     logger.info(`Mounted ${name} to ${endPoint}`);
   });
 
-  // handle all other routes (A.K.A 404)
+  // Handle all other routes (A.K.A 404)
   app.use('*', (req, res) => res.status(404).json({
     message: 'Oops! No such route!',
   }));
